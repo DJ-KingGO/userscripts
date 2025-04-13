@@ -2,6 +2,8 @@
 *   Basic Utils for Userscripts
 */
 
+const DEBUG = true;
+
 class BasicUtils {
     // Nachrichten in der Konsole ausgeben
     static log(msg, emoji = "📘") {
