@@ -9,7 +9,7 @@ class BasicUtils {
     // Setzt den DEBUG-Wert
     static setDebug(value) {
         this.DEBUG = value;
-        this.log(`DEBUG auf ${value ? "aktiviert" : "deaktiviert"} gesetzt`, "⚙️");
+        this.log(`Debugmode: ${value ? "aktiviert" : "deaktiviert"}`, "⚙️");
     }
 
     // Gibt den aktuellen DEBUG-Wert zurück
