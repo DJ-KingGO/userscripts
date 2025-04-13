@@ -2,8 +2,6 @@
 *   Basic Utils for Userscripts
 */
 
-const DEBUG = true;
-
 class BasicUtils {
     // Nachrichten in der Konsole ausgeben
     static log(msg, emoji = "📘") {
@@ -151,6 +149,16 @@ class BasicUtils {
         this.log(`${elementSelector} hat ${elapsedTimeInSeconds} Sekunden benötigt.`, "✅");
 
         return true;
+    }
+
+    // Wartet darauf, dass der Ladebildschirm verschwindet
+    static async waitForLoadingScreen() {
+        const loadingScreen = this.$('.loadingScreen');
+        while (loadingScreen && loadingScreen.style.display !== 'none') {
+            await this.wait(1000, 2000); // Wartet zufällig 1-2 Sekunden
+            this.log("Warte auf Ladebildschirm…", "🔄");
+        }
+        this.log("Ladebildschirm fertig", "✅");
     }
 
 }
