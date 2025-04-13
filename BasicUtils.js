@@ -167,12 +167,18 @@ class BasicUtils {
 
     // Wartet darauf, dass der Ladebildschirm verschwindet
     static async waitForLoadingScreen() {
-        const loadingScreen = this.$('.loadingScreen');
         this.log("Warte auf Ladebildschirm…", "🔄");
-        while (loadingScreen && loadingScreen.style.display !== 'none') {
-            await this.wait(1000, 2000); // Wartet zufällig 1-2 Sekunden
+    
+        const check = () => {
+            const loading = this.$('.loadingScreen');
+            return !loading || loading.style.display === 'none';
+        };
+    
+        while (!check()) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
         }
+    
         this.log("Ladebildschirm fertig", "✅");
+        return true;
     }
-
 }
