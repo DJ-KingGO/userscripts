@@ -2,7 +2,7 @@
 *   Basic Utils for Userscripts
 */
 
-const DEBUG = true;
+const DEBUG = false;
 
 class BasicUtils {
     // Nachrichten in der Konsole ausgeben
