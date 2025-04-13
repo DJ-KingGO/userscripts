@@ -2,9 +2,21 @@
 *   Basic Utils for Userscripts
 */
 
-const DEBUG = false;
-
 class BasicUtils {
+    // Standardwert für DEBUG
+    static DEBUG = false;
+
+    // Setzt den DEBUG-Wert
+    static setDebug(value) {
+        this.DEBUG = value;
+        this.log(`DEBUG auf ${value ? "aktiviert" : "deaktiviert"} gesetzt`, "⚙️");
+    }
+
+    // Gibt den aktuellen DEBUG-Wert zurück
+    static getDebug() {
+        return this.DEBUG;
+    }
+    
     // Nachrichten in der Konsole ausgeben
     static log(msg, emoji = "📘") {
         if (DEBUG) console.log(`${emoji} ${msg}`);
