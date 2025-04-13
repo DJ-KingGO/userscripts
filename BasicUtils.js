@@ -19,7 +19,7 @@ class BasicUtils {
     
     // Nachrichten in der Konsole ausgeben
     static log(msg, emoji = "📘") {
-        if (DEBUG) console.log(`${emoji} ${msg}`);
+        if (this.DEBUG) console.log(`${emoji} ${msg}`);
     }
 
     // Kurzform für document.querySelector
