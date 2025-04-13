@@ -88,11 +88,11 @@ class BasicUtils {
             if (remainingTime <= 0) {
                 clearInterval(this.countdowns[name]);
                 delete this.countdowns[name];
-                this.log(`${name} - Countdown abgelaufen`, "✅");
+                //this.log(`${name} - Countdown abgelaufen`, "✅");
                 action();
             }
         }, 1000);
-        this.log(`${name} - Countdown gestartet`, "⏱️");
+        //this.log(`${name} - Countdown gestartet`, "⏱️");
     }
 
     // Stoppt einen laufenden Countdown
