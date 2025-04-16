@@ -1,38 +1,100 @@
 /*
-*   Basic Utils for Userscripts
-*/
+ * BasicUtils
+ * Hilfsklasse für Userscripts in Browsergames
+ * Enthält vereinfachte Utilities für DOM, Timing, Events und Storage
+ */
 
 class BasicUtils {
-    // Standardwert für DEBUG
+    // ========================
+    // Konfiguration & Logging
+    // ========================
+
+    /*
+     * DEBUG Flag
+     * Aktiviert/Deaktiviert Logging
+     */
     static DEBUG = false;
 
-    // Setzt den DEBUG-Wert
+    /*
+     * setDebug
+     * Setzt den Debugmodus (true = aktiv)
+     * 
+     * Parameters:
+     *   value (boolean): Aktivierung
+     */
     static setDebug(value) {
         this.DEBUG = value;
         this.log(`Debugmode: ${value ? "aktiviert" : "deaktiviert"}`, "⚙️");
     }
 
-    // Gibt den aktuellen DEBUG-Wert zurück
+    /*
+     * getDebug
+     * Gibt aktuellen Debugstatus zurück
+     * 
+     * Returns:
+     *   boolean
+     */
     static getDebug() {
         return this.DEBUG;
     }
     
-    // Nachrichten in der Konsole ausgeben
+    /*
+     * log
+     * Gibt eine Debugnachricht aus, wenn DEBUG aktiv ist
+     * 
+     * Parameters:
+     *   msg (string): Nachricht
+     *   emoji (string): Optionales Symbol zur Markierung
+     */
     static log(msg, emoji = "📘") {
         if (this.DEBUG) console.log(`${emoji} ${msg}`);
     }
 
-    // Kurzform für document.querySelector
+    // ========================
+    // DOM Hilfsfunktionen
+    // ========================
+
+    /*
+     * $
+     * Kurzform für document.querySelector
+     * 
+     * Parameters:
+     *   selector (string): CSS-Selektor
+     *   root (Element): Root-Element (optional)
+     * 
+     * Returns:
+     *   Element|null
+     */
     static $(selector, root = document) {
         return root.querySelector(selector);
     }
 
-    // Kurzform für document.querySelectorAll, gibt ein Array zurück
+    /*
+     * $$
+     * Kurzform für document.querySelectorAll
+     * 
+     * Parameters:
+     *   selector (string): CSS-Selektor
+     *   root (Element): Root-Element (optional)
+     * 
+     * Returns:
+     *   Array<Element>
+     */
     static $$(selector, root = document) {
         return [...root.querySelectorAll(selector)];
     }
 
-    // Simuliert einen Klick auf ein Element (mousedown, mouseup, click)
+    // ========================
+    // Events und Simulationen
+    // ========================
+
+    /*
+     * simulateClick
+     * Simuliert Mausklick (mousedown, mouseup, click)
+     * 
+     * Parameters:
+     *   element (Element): Ziel-Element
+     */
     static simulateClick(element) {
         ['mousedown', 'mouseup', 'click'].forEach(type => {
             const event = new MouseEvent(type, { bubbles: true, cancelable: true, view: window });
@@ -41,37 +103,98 @@ class BasicUtils {
         this.log("Simulierter Klick", "🖱️");
     }
 
-    // Simuliert das Überfahren eines Elements mit der Maus (mouseover)
+    /*
+     * simulateHover
+     * Simuliert Mouseover-Ereignis
+     * 
+     * Parameters:
+     *   element (Element): Ziel-Element
+     */
     static simulateHover(element) {
         const event = new MouseEvent('mouseover', { bubbles: true, cancelable: true });
         element.dispatchEvent(event);
         this.log("Simulierter Hover", "👆");
     }
 
-    // Simuliert das Verlassen eines Elements mit der Maus (mouseout)
+    /*
+     * simulateMouseOut
+     * Simuliert Mouseout-Ereignis
+     * 
+     * Parameters:
+     *   element (Element): Ziel-Element
+     */
     static simulateMouseOut(element) {
         const event = new MouseEvent('mouseout', { bubbles: true, cancelable: true });
         element.dispatchEvent(event);
         this.log("Simulierter MouseOut", "👋");
     }
 
-    // Wartet für eine zufällige Zeitspanne zwischen minMs und maxMs (wenn beide angegeben) oder exakt minMs
+    // ========================
+    // Zeitfunktionen
+    // ========================
+
+    /*
+     * wait
+     * Pausiert für bestimmte oder zufällige Dauer
+     * 
+     * Parameters:
+     *   minMs (number): Mindestdauer in ms
+     *   maxMs (number): Maximale Dauer in ms (optional)
+     * 
+     * Returns:
+     *   Promise<void>
+     */
     static wait(minMs, maxMs) {
         let delay;
         if (maxMs) {
-            delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs; // Zufällige Zeitspanne
+            delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
             this.log(`Warte ${delay}ms`, "⏳");
         } else {
-            delay = minMs; // Exakte Zeitspanne
+            delay = minMs;
             this.log(`Warte exakt ${delay}ms`, "⏳");
         }
         return new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    // Objekt zum Verwalten von Countdowns
+    /*
+     * waitUntil
+     * Wartet bis eine Bedingung erfüllt ist oder ein Timeout überschritten wird
+     * 
+     * Used for:
+     *   - Dynamisches Laden von Elementen abwarten
+     * 
+     * Parameters:
+     *   conditionFn (Function): Muss true zurückgeben
+     *   interval (number): Prüfintervall (ms), Default 500
+     *   timeout (number): Abbruchzeit (ms), Default 10000
+     * 
+     * Returns:
+     *   Promise<boolean> – true wenn erfüllt, false bei Timeout
+     */
+    static async waitUntil(conditionFn, interval = 500, timeout = 10000) {
+        const start = Date.now();
+        while (!conditionFn()) {
+            if (Date.now() - start > timeout) return false;
+            await this.wait(interval);
+        }
+        return true;
+    }
+
+    // ========================
+    // Countdown Management
+    // ========================
+
     static countdowns = {};
 
-    // Startet einen Countdown, der eine Aktion ausführt, wenn die Zielzeit erreicht ist
+    /*
+     * startCountdown
+     * Startet Countdown und führt Aktion bei Zielzeit aus
+     * 
+     * Parameters:
+     *   name (string): Bezeichner
+     *   targetTimestamp (number): Zeitpunkt (ms)
+     *   action (Function): Auszuführende Funktion
+     */
     static startCountdown(name, targetTimestamp, action) {
         const now = Date.now();
         const timeLeft = targetTimestamp - now;
@@ -82,20 +205,23 @@ class BasicUtils {
             return;
         }
 
-        // Startet den Countdown und führt jede Sekunde eine Überprüfung durch
         this.countdowns[name] = setInterval(() => {
-            const remainingTime = targetTimestamp - Date.now();
-            if (remainingTime <= 0) {
+            const remaining = targetTimestamp - Date.now();
+            if (remaining <= 0) {
                 clearInterval(this.countdowns[name]);
                 delete this.countdowns[name];
-                //this.log(`${name} - Countdown abgelaufen`, "✅");
                 action();
             }
         }, 1000);
-        //this.log(`${name} - Countdown gestartet`, "⏱️");
     }
 
-    // Stoppt einen laufenden Countdown
+    /*
+     * stopCountdown
+     * Stoppt laufenden Countdown
+     * 
+     * Parameters:
+     *   name (string): Bezeichner
+     */
     static stopCountdown(name) {
         if (this.countdowns[name]) {
             clearInterval(this.countdowns[name]);
@@ -106,79 +232,121 @@ class BasicUtils {
         }
     }
 
-    // Speichert einen Wert im LocalStorage
+    // ========================
+    // LocalStorage Management
+    // ========================
+
+    /*
+     * setLocalStorage
+     * Speichert Daten im localStorage
+     * 
+     * Parameters:
+     *   name (string): Schlüssel
+     *   value (any): Wert
+     */
     static setLocalStorage(name, value) {
         try {
             localStorage.setItem(name, JSON.stringify(value));
             this.log(`${name} gespeichert`, "💾");
-        } catch (error) {
-            console.error("❌ Fehler beim Speichern:", error);
+        } catch (e) {
+            console.error("❌ Fehler beim Speichern:", e);
         }
     }
 
-    // Lädt einen Wert aus dem LocalStorage
+    /*
+     * getLocalStorage
+     * Liest Daten aus localStorage
+     * 
+     * Parameters:
+     *   name (string): Schlüssel
+     * 
+     * Returns:
+     *   any|null
+     */
     static getLocalStorage(name) {
         try {
             const value = localStorage.getItem(name);
             this.log(`${name} geladen`, "📤");
             return value ? JSON.parse(value) : null;
-        } catch (error) {
-            console.error("❌ Fehler beim Laden:", error);
+        } catch (e) {
+            console.error("❌ Fehler beim Laden:", e);
             return null;
         }
     }
 
-    // Entfernt einen Wert aus dem LocalStorage
+    /*
+     * removeLocalStorage
+     * Löscht Daten aus localStorage
+     * 
+     * Parameters:
+     *   name (string): Schlüssel
+     */
     static removeLocalStorage(name) {
         try {
             localStorage.removeItem(name);
             this.log(`${name} entfernt`, "🗑️");
-        } catch (error) {
-            console.error("❌ Fehler beim Entfernen:", error);
+        } catch (e) {
+            console.error("❌ Fehler beim Entfernen:", e);
         }
     }
 
-    // Wartet darauf, dass ein beliebiges Element verschwindet oder ein Timeout überschritten wird
-    static async waitForElement(elementSelector, timeout) {
-        const startTime = Date.now(); // Startzeit des Wartens
-        let element = this.$(elementSelector); // Versuchen, das Element zu finden
+    // ========================
+    // Dynamisches Warten
+    // ========================
 
-        // Loggen zu Beginn
-        this.log(`Warte auf ${elementSelector}...`, "🔄");
+    /*
+     * waitForElement
+     * Wartet auf das Erscheinen eines Elements bis Timeout
+     * 
+     * Parameters:
+     *   selector (string): CSS-Selektor
+     *   timeout (number): Max. Wartezeit in ms
+     * 
+     * Returns:
+     *   Promise<boolean>
+     */
+    static async waitForElement(selector, timeout) {
+        const start = Date.now();
+        let element = this.$(selector);
+        this.log(`Warte auf ${selector}...`, "🔄");
 
-        // Warten, bis das Element erscheint oder der Timeout erreicht wird
-        while (!element && (Date.now() - startTime) < timeout) {
-            await this.wait(1000, 2000); // Wartet zufällig 1-2 Sekunden
-            element = this.$(elementSelector); // Versuchen, das Element erneut zu finden
+        while (!element && (Date.now() - start) < timeout) {
+            await this.wait(1000, 2000);
+            element = this.$(selector);
         }
 
-        // Wenn das Element nicht gefunden wurde oder Timeout erreicht ist
         if (!element) {
-            this.log(`Timeout erreicht, ${elementSelector} ist weiterhin nicht sichtbar`, "⏳");
-            return false; // Timeout überschritten und Element ist immer noch nicht sichtbar
+            this.log(`Timeout erreicht, ${selector} ist weiterhin nicht sichtbar`, "⏳");
+            return false;
         }
 
-        // Loggen nach Abschluss
-        const elapsedTimeInSeconds = Math.floor((Date.now() - startTime) / 1000);
-        this.log(`${elementSelector} hat ${elapsedTimeInSeconds} Sekunden benötigt.`, "✅");
-
+        const elapsed = Math.floor((Date.now() - start) / 1000);
+        this.log(`${selector} hat ${elapsed}s benötigt.`, "✅");
         return true;
     }
 
-    // Wartet darauf, dass der Ladebildschirm verschwindet
+    /*
+     * waitForLoadingScreen
+     * Wartet auf das Ende eines Ladebildschirms (z.B. .loadingScreen)
+     * 
+     * Returns:
+     *   Promise<boolean>
+     */
     static async waitForLoadingScreen() {
         this.log("Warte auf Ladebildschirm…", "🔄");
-    
+
         const check = () => {
             const loading = this.$('.loadingScreen');
             return !loading || loading.style.display === 'none';
         };
-    
+
         while (!check()) {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
-    
+
         this.log("Ladebildschirm fertig", "✅");
         return true;
     }
+}
+
 }
