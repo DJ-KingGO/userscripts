@@ -7,54 +7,28 @@ class BasicUtils {
     static overlayElement = null;
     static countdowns = {};
 
-    /* Used for toggling debug mode
-     * @param {boolean} value - true = on, false = off
-     * No return
-     */
     static setDebug(value) {
         this.DEBUG = value;
         this.log(`Debugmode: ${value ? "aktiviert" : "deaktiviert"}`, "⚙️");
     }
 
-    /* Used for getting current debug state
-     * @return {boolean} DEBUG
-     */
     static getDebug() {
         return this.DEBUG;
     }
 
-    /* Used for console logging (only in debug mode)
-     * @param {string} msg - Message to log
-     * @param {string} emoji - Optional emoji prefix
-     * No return
-     */
     static log(msg, emoji = "📘") {
         if (this.DEBUG) console.log(`${emoji} ${msg}`);
         this.logToOverlay(`${emoji} ${msg}`);
     }
 
-    /* Used for selecting single element
-     * @param {string} selector - CSS selector
-     * @param {HTMLElement} root - Optional root element
-     * @return {HTMLElement|null}
-     */
     static $(selector, root = document) {
         return root.querySelector(selector);
     }
 
-    /* Used for selecting multiple elements
-     * @param {string} selector - CSS selector
-     * @param {HTMLElement} root - Optional root element
-     * @return {HTMLElement[]} Array of found elements
-     */
     static $$(selector, root = document) {
         return [...root.querySelectorAll(selector)];
     }
 
-    /* Used for simulating a full mouse click
-     * @param {HTMLElement} element
-     * No return
-     */
     static simulateClick(element) {
         ['mousedown', 'mouseup', 'click'].forEach(type => {
             const event = new MouseEvent(type, { bubbles: true, cancelable: true, view: window });
@@ -63,31 +37,18 @@ class BasicUtils {
         this.log("Simulierter Klick", "🖱️");
     }
 
-    /* Used for simulating mouse hover
-     * @param {HTMLElement} element
-     * No return
-     */
     static simulateHover(element) {
         const event = new MouseEvent('mouseover', { bubbles: true, cancelable: true });
         element.dispatchEvent(event);
         this.log("Simulierter Hover", "👆");
     }
 
-    /* Used for simulating mouseout
-     * @param {HTMLElement} element
-     * No return
-     */
     static simulateMouseOut(element) {
         const event = new MouseEvent('mouseout', { bubbles: true, cancelable: true });
         element.dispatchEvent(event);
         this.log("Simulierter MouseOut", "👋");
     }
 
-    /* Used for waiting (randomized if maxMs given)
-     * @param {number} minMs - minimum milliseconds
-     * @param {number} maxMs - optional maximum milliseconds
-     * @return {Promise<void>}
-     */
     static wait(minMs, maxMs) {
         let delay;
         if (maxMs) {
@@ -100,15 +61,10 @@ class BasicUtils {
         return new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    /* Used for waiting until an element appears or timeout
-     * @param {string} selector
-     * @param {number} timeout - in ms
-     * @return {Promise<boolean>} true if found
-     */
     static async waitForElement(selector, timeout) {
         const startTime = Date.now();
         let element = this.$(selector);
-        this.log(`Warte auf ${selector}...`, "🔄");
+        this.log(`Warte auf ${selector}...`, "⏳");
 
         while (!element && (Date.now() - startTime) < timeout) {
             await this.wait(1000, 2000);
@@ -116,7 +72,7 @@ class BasicUtils {
         }
 
         if (!element) {
-            this.log(`Timeout erreicht, ${selector} ist weiterhin nicht sichtbar`, "⏳");
+            this.log(`Timeout erreicht, ${selector} ist weiterhin nicht sichtbar`, "⚠️");
             return false;
         }
 
@@ -125,11 +81,8 @@ class BasicUtils {
         return true;
     }
 
-    /* Used for waiting until loading screen disappears
-     * @return {Promise<boolean>} true when gone
-     */
     static async waitForLoadingScreen() {
-        this.log("Warte auf Ladebildschirm…", "🔄");
+        this.log("Warte auf Ladebildschirm…", "⏳");
         const check = () => {
             const loading = this.$('.loadingScreen');
             return !loading || loading.style.display === 'none';
@@ -141,11 +94,6 @@ class BasicUtils {
         return true;
     }
 
-    /* Used for starting a countdown
-     * @param {string} name
-     * @param {number} targetTimestamp
-     * @param {Function} action - callback when done
-     */
     static startCountdown(name, targetTimestamp, action) {
         const now = Date.now();
         const timeLeft = targetTimestamp - now;
@@ -166,10 +114,6 @@ class BasicUtils {
         }, 1000);
     }
 
-    /* Used for stopping a countdown
-     * @param {string} name
-     * No return
-     */
     static stopCountdown(name) {
         if (this.countdowns[name]) {
             clearInterval(this.countdowns[name]);
@@ -180,10 +124,6 @@ class BasicUtils {
         }
     }
 
-    /* Used for saving data to LocalStorage
-     * @param {string} name
-     * @param {*} value - will be JSON.stringify'd
-     */
     static setLocalStorage(name, value) {
         try {
             localStorage.setItem(name, JSON.stringify(value));
@@ -193,10 +133,6 @@ class BasicUtils {
         }
     }
 
-    /* Used for loading data from LocalStorage
-     * @param {string} name
-     * @return {*} parsed JSON or null
-     */
     static getLocalStorage(name) {
         try {
             const value = localStorage.getItem(name);
@@ -208,10 +144,6 @@ class BasicUtils {
         }
     }
 
-    /* Used for removing a LocalStorage entry
-     * @param {string} name
-     * No return
-     */
     static removeLocalStorage(name) {
         try {
             localStorage.removeItem(name);
@@ -221,59 +153,62 @@ class BasicUtils {
         }
     }
 
-    /* Used for observing DOM changes
-     * @param {HTMLElement} element - root to observe
-     * @param {Function} callback - triggered on change
-     */
     static observeDOMChanges(element, callback) {
         const observer = new MutationObserver(callback);
         observer.observe(element, { childList: true, subtree: true });
         this.log("DOM-Observer gestartet", "🔍");
     }
 
-    /* Used for getting trimmed innerText
-     * @param {string} selector
-     * @return {string|null} text content or null
-     */
     static getText(selector) {
         const el = this.$(selector);
         return el ? el.innerText.trim() : null;
     }
 
-    /* Used for showing the floating debug overlay
-     * No return
-     */
     static showDebugOverlay() {
-        if (this.overlayElement) return;
-        const overlay = document.createElement("div");
-        overlay.id = "debug-overlay";
-        overlay.style.cssText = `
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 5px;
-            z-index: 99999;
-            width: 100%;
-        `;
-        document.body.appendChild(overlay);
-        this.overlayElement = overlay;
+        if (document.getElementById("debug-overlay")) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.id = "debug-overlay";
+        wrapper.style.position = "fixed";
+        wrapper.style.bottom = "100px";
+        wrapper.style.left = "30px";
+        wrapper.style.width = "500px";
+        wrapper.style.maxHeight = "200px";
+        //wrapper.style.overflow = "hidden";
+        wrapper.style.zIndex = "999999";
+        wrapper.style.pointerEvents = "none"; // Klicks blockieren nichts
+        document.body.appendChild(wrapper);
+
+        const content = document.createElement("div");
+        content.id = "debug-overlay-content";
+        content.style.background = "rgba(0, 0, 0, 0.8)";
+        content.style.color = "#0f0";
+        content.style.fontSize = "12px";
+        content.style.fontFamily = "monospace";
+        content.style.padding = "10px";
+        content.style.border = "1px solid #0f0";
+        content.style.borderRadius = "8px";
+        content.style.overflowY = "auto";
+        content.style.maxHeight = "200px";
+        content.style.pointerEvents = "auto"; // ← Nur dieses Element reagiert
+        wrapper.appendChild(content);
+
+        // Cookie setzen, um Cookie-Banner dauerhaft zu unterdrücken
+        document.cookie = "cmpboxrecall=1; path=/; max-age=31536000"; // 1 Jahr gültig
+
+        const cmp = document.getElementById("cmpwrapper");
+        if (cmp) {
+            cmp.remove(); // Ganz entfernen statt nur verstecken
+            this.log("cmpwrapper entfernt und Cookie gesetzt", "🛡️");
+        }
     }
 
-    /* Used for logging text into debug overlay
-     * @param {string} msg
-     * No return
-     */
     static logToOverlay(msg) {
-        if (!this.overlayElement) return;
-        const entry = document.createElement("div");
-        entry.textContent = msg;
-        this.overlayElement.appendChild(entry);
-        this.overlayElement.scrollTop = this.overlayElement.scrollHeight;
+        const content = document.getElementById("debug-overlay-content");
+        if (!content) return;
+        const p = document.createElement("div");
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        content.appendChild(p);
+        content.scrollTop = content.scrollHeight; // Immer ganz nach unten scrollen
     }
 }
